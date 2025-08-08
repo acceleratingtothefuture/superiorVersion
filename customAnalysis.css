@@ -290,4 +290,8 @@ select, input[type="checkbox"] {
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.7; transform: scale(1.05); }
+
 }
+
+/* Bold, non-clickable headers inside the metric dropdown */
+.sidebar select optgroup { font-weight: 800; color: #333; }
