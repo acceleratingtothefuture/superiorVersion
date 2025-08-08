@@ -338,7 +338,7 @@ document.getElementById('metric').parentElement.style.display = isCaseMode ? '' 
   alasql('CREATE TABLE cases');
   alasql('INSERT INTO cases SELECT * FROM ?', [rows]);
 
-   const range   = document.getElementById('range').value;
+
   const dim     = document.getElementById('dimension').value;
 
   // Effective metric: defendants ignore the cases metric dropdown
@@ -346,7 +346,26 @@ document.getElementById('metric').parentElement.style.display = isCaseMode ? '' 
   const metric   = isCaseMode ? metricEl.value : 'all_cases';
 
  const timeMode = (isCaseMode && COMPLETED_METRICS.has(metric)) ? 'status' : 'received';
+
+ // ── lock time range to Last 12 months for closed-case metrics in CASES ──
+const rangeEl = document.getElementById('range');
+if (isCaseMode && COMPLETED_METRICS.has(metric)) {
+  // Force it
+  if (rangeEl.value !== 'last12') rangeEl.value = 'last12';
+  // Hide other options and disable the control
+  Array.from(rangeEl.options).forEach(o => { o.hidden = (o.value !== 'last12'); });
+  rangeEl.disabled = true;
+} else {
+  // Restore options and enable the control
+  Array.from(rangeEl.options).forEach(o => { o.hidden = false; });
+  rangeEl.disabled = false;
+}
+// Now read the (possibly forced) value
+const range = rangeEl.value;
+
 const floorYear = isCaseMode ? MIN_CASE_YEAR : null;
+
+ 
 
 
   // Pie mode: allow in both datasets, but for cases we only enable pie
@@ -725,6 +744,7 @@ document.getElementById('toStats').onclick = () => activatePanel(1);
 document.getElementById('toMonthly').onclick = () => activatePanel(2);
 
 window.build = build;
+
 
 
 
