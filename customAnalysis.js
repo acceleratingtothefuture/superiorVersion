@@ -30,6 +30,9 @@ const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug',
 
 const COMPLETED_METRICS = new Set(['Sentenced','Dismissed']);
 
+let MIN_CASE_YEAR = null;
+
+
 function isValidDate(d){ return d instanceof Date && !Number.isNaN(d.getTime()); }
 
 function keyFromRecord(r, range, mode){
@@ -44,39 +47,48 @@ function keyFromRecord(r, range, mode){
   return `${y}-${m}`;
 }
 
-function buildBuckets(rows, range, mode, metric){
-  if (range === 'last12'){
-    const useRow = r =>
-  mode !== 'status' ? true :
-  (COMPLETED_METRICS.has(metric) ? r.status === metric : true);
+function buildBuckets(rows, range, mode, metric, floorYear){
 
-const times = rows
-  .filter(useRow)
-  .map(r => mode==='status' ? r.status_ts : r.ts)
-  .filter(Number.isFinite);
+ if (range === 'last12'){
+  const useRow = r =>
+    mode !== 'status' ? true :
+    (COMPLETED_METRICS.has(metric) ? r.status === metric : true);
 
-    if (!times.length) return [];
-    const maxTs = Math.max(...times);
-    const maxD = new Date(maxTs);
-    const startY = maxD.getFullYear();
-    const startM = maxD.getMonth();
+  const times = rows
+    .filter(useRow)
+    .map(r => mode === 'status' ? r.status_ts : r.ts)
+    .filter(Number.isFinite);
 
-    const out = [];
-    for (let i = 11; i >= 0; i--){
-      const offset = startM - i;
-      const y = startY + Math.floor(offset/12);
-      const m0 = (offset % 12 + 12) % 12;
-      out.push({
-        y, m: m0+1,
-        label: `${MONTH_NAMES[m0]} '${String(y).slice(-2)}`,
-        key: `${y}-${m0+1}`
-      });
-    }
-    return out;
+  if (!times.length) return [];
+
+  const maxTs = Math.max(...times);
+  const maxD = new Date(maxTs);
+  const startY = maxD.getFullYear();
+  const startM = maxD.getMonth();
+
+  const out = [];
+  for (let i = 11; i >= 0; i--){
+    const offset = startM - i;
+    const y = startY + Math.floor(offset / 12);
+    const m0 = (offset % 12 + 12) % 12;
+    out.push({
+      y, m: m0 + 1,
+      label: `${MONTH_NAMES[m0]} '${String(y).slice(-2)}`,
+      key: `${y}-${m0 + 1}`
+    });
   }
 
+  return floorYear ? out.filter(b => b.y >= floorYear) : out;
+}
+
+
+
+
   if (range === 'monthly'){
-    const yrs = [...new Set(rows.map(r => mode==='status' ? r.status_year : r.year))].filter(Boolean).sort((a,b)=>a-b);
+   const yrs = [...new Set(rows.map(r => mode==='status' ? r.status_year : r.year))]
+  .filter(y => y && (!floorYear || y >= floorYear))
+  .sort((a,b)=>a-b);
+
     const out = [];
     yrs.forEach(y=>{
       MONTH_NAMES.forEach((_,i)=>{
@@ -87,7 +99,10 @@ const times = rows
   }
 
   if (range === 'quarterly'){
-    const yrs = [...new Set(rows.map(r => mode==='status' ? r.status_year : r.year))].filter(Boolean).sort((a,b)=>a-b);
+   const yrs = [...new Set(rows.map(r => mode==='status' ? r.status_year : r.year))]
+  .filter(y => y && (!floorYear || y >= floorYear))
+  .sort((a,b)=>a-b);
+
     const out = [];
     yrs.forEach(y=>{
       [1,2,3,4].forEach(q=>{
@@ -97,8 +112,11 @@ const times = rows
     return out;
   }
 
-  const yrs = [...new Set(rows.map(r => mode==='status' ? r.status_year : r.year))].filter(Boolean).sort((a,b)=>a-b);
-  return yrs.map(y => ({ y, label:String(y), key:String(y) }));
+  const yrs = [...new Set(rows.map(r => mode === 'status' ? r.status_year : r.year))]
+  .filter(y => y && (!floorYear || y >= floorYear))
+  .sort((a,b) => a - b);
+return yrs.map(y => ({ y, label: String(y), key: String(y) }));
+
 }
 
 /***** HOVER BAR PLUGIN *****/
@@ -155,6 +173,7 @@ async function ensureLoaded(dataset) {
   if (loaded[dataset]) return;
   const years = await discoverYears(dataset);
   if (dataset === 'cases') {
+   MIN_CASE_YEAR = years.length ? Math.min(...years) : null;
     await loadCasesData(years);
   } else {
     await loadDefendantsData(years);
@@ -327,6 +346,7 @@ document.getElementById('metric').parentElement.style.display = isCaseMode ? '' 
   const metric   = isCaseMode ? metricEl.value : 'all_cases';
 
  const timeMode = (isCaseMode && COMPLETED_METRICS.has(metric)) ? 'status' : 'received';
+const floorYear = isCaseMode ? MIN_CASE_YEAR : null;
 
 
   // Pie mode: allow in both datasets, but for cases we only enable pie
@@ -335,7 +355,7 @@ document.getElementById('metric').parentElement.style.display = isCaseMode ? '' 
                    (isCaseMode ? (metric === 'all_cases' || STATUS_TYPES.includes(metric)) : true);
 
   /* buckets */
-  const buckets = buildBuckets(rows, range, timeMode, metric);
+  const buckets = buildBuckets(rows, range, timeMode, metric, floorYear);
 if (!buckets.length) {
   const grid = document.getElementById('chartGrid');
   grid.innerHTML = `
@@ -542,11 +562,11 @@ grid.innerHTML = `
     data:{
       labels,
       datasets:[{
-        label:metricName,
-        data:lineData,
-        borderColor:'#000',backgroundColor:'#000',
-        tension:.18,pointRadius:0,pointHoverRadius:5
-      }]
+  label: prettyName(metricName),
+  data: lineData,
+  borderColor:'#000', backgroundColor:'#000',
+  tension:.18, pointRadius:0, pointHoverRadius:5
+}]
     },
     options:{
       responsive:true,animation:false,
@@ -705,6 +725,7 @@ document.getElementById('toStats').onclick = () => activatePanel(1);
 document.getElementById('toMonthly').onclick = () => activatePanel(2);
 
 window.build = build;
+
 
 
 
