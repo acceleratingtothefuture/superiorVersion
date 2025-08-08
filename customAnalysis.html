@@ -63,16 +63,19 @@
 </label>
 
         <label>Measure
-          <select id="metric">
-            <option value="all_cases">All cases received</option>
-            <option value="accepted">Accepted cases</option>
-            <option value="rejected">Rejected cases</option>
-            <optgroup label="Completed cases">
-              <option value="Sentenced">Sentenced</option>
-              <option value="Dismissed">Dismissed</option>
-            </optgroup>
-          </select>
-        </label>
+  <select id="metric">
+    <optgroup label="ALL CASES (SORT BY DATE RECEIVED)">
+      <option value="all_cases">All cases received</option>
+      <option value="accepted">Accepted cases</option>
+      <option value="rejected">Rejected cases</option>
+    </optgroup>
+    <optgroup label="COMPLETED CASES (SORT BY DATE COMPLETED)">
+      <option value="Sentenced">Sentenced</option>
+      <option value="Dismissed">Dismissed</option>
+    </optgroup>
+  </select>
+</label>
+
 
         <label>Time range
           <select id="range">
@@ -110,3 +113,4 @@
 
 </body>
 </html>
+
