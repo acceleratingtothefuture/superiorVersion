@@ -85,6 +85,7 @@ export function cleanCaseRow(rec){
   return {
     case_id          : id,
     date_da          : row['case received by da'],
+    status_date      : row['status date'] || '',
     severity         : (t => t.toUpperCase()==='VOP' ? 'Violation of Probation' : t)(tidy(row['severity'])),
     agency           : canonicalAgency(row['arresting agency']),
     city             : tidy(row['location city']),
@@ -127,4 +128,5 @@ export function cleanDefRow(rec){
     age       : (()=>{ const n = parseInt(tidy(row['defendant age']),10);
                        return Number.isFinite(n) ? n : null; })(),
   };
+
 }
