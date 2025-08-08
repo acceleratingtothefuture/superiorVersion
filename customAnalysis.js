@@ -28,6 +28,79 @@ const STATUS_TYPES = ['Filed', 'Dismissed', 'Rejected', 'Open', 'Sentenced', 'ac
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug',
                      'Sep','Oct','Nov','Dec'];
 
+const COMPLETED_METRICS = new Set(['Sentenced','Dismissed']);
+
+function isValidDate(d){ return d instanceof Date && !Number.isNaN(d.getTime()); }
+
+function keyFromRecord(r, range, mode){
+  const y = mode === 'status' ? r.status_year  : r.year;
+  const m = mode === 'status' ? r.status_month : r.month;
+  const q = mode === 'status' ? r.status_quarter : r.quarter;
+  if (!y) return null;
+
+  if (range === 'monthly')   return `${y}-${m}`;
+  if (range === 'quarterly') return `${y}-Q${q}`;
+  if (range === 'annual')    return String(y);
+  return `${y}-${m}`;
+}
+
+function buildBuckets(rows, range, mode, metric){
+  if (range === 'last12'){
+    const useRow = r =>
+  mode !== 'status' ? true :
+  (COMPLETED_METRICS.has(metric) ? r.status === metric : true);
+
+const times = rows
+  .filter(useRow)
+  .map(r => mode==='status' ? r.status_ts : r.ts)
+  .filter(Number.isFinite);
+
+    if (!times.length) return [];
+    const maxTs = Math.max(...times);
+    const maxD = new Date(maxTs);
+    const startY = maxD.getFullYear();
+    const startM = maxD.getMonth();
+
+    const out = [];
+    for (let i = 11; i >= 0; i--){
+      const offset = startM - i;
+      const y = startY + Math.floor(offset/12);
+      const m0 = (offset % 12 + 12) % 12;
+      out.push({
+        y, m: m0+1,
+        label: `${MONTH_NAMES[m0]} '${String(y).slice(-2)}`,
+        key: `${y}-${m0+1}`
+      });
+    }
+    return out;
+  }
+
+  if (range === 'monthly'){
+    const yrs = [...new Set(rows.map(r => mode==='status' ? r.status_year : r.year))].filter(Boolean).sort((a,b)=>a-b);
+    const out = [];
+    yrs.forEach(y=>{
+      MONTH_NAMES.forEach((_,i)=>{
+        out.push({ y, m:i+1, label:`${MONTH_NAMES[i]} '${String(y).slice(-2)}`, key:`${y}-${i+1}` });
+      });
+    });
+    return out;
+  }
+
+  if (range === 'quarterly'){
+    const yrs = [...new Set(rows.map(r => mode==='status' ? r.status_year : r.year))].filter(Boolean).sort((a,b)=>a-b);
+    const out = [];
+    yrs.forEach(y=>{
+      [1,2,3,4].forEach(q=>{
+        out.push({ y, q, label:`Q${q} '${String(y).slice(-2)}`, key:`${y}-Q${q}` });
+      });
+    });
+    return out;
+  }
+
+  const yrs = [...new Set(rows.map(r => mode==='status' ? r.status_year : r.year))].filter(Boolean).sort((a,b)=>a-b);
+  return yrs.map(y => ({ y, label:String(y), key:String(y) }));
+}
+
 /***** HOVER BAR PLUGIN *****/
 const hoverBar = {
   id: 'hoverBar',
@@ -60,9 +133,6 @@ let rows       = caseRows;   // points at the active set
 /* ── visuals ─────────────────────────────────── */
 let charts = [], pieChart = null;
 
-
-let fileChartObj = null;
-let sentChartObj = null;
 
 
 async function discoverYears(type) {
@@ -116,6 +186,20 @@ async function loadCasesData(YEARS) {
       cleaned.year    = dt.getFullYear();
       cleaned.month   = dt.getMonth() + 1;
       cleaned.quarter = Math.floor(dt.getMonth() / 3) + 1;
+
+     const sdt = new Date(cleaned.status_date || '');
+if (isValidDate(sdt)) {
+  cleaned.status_ts      = sdt.getTime();
+  cleaned.status_year    = sdt.getFullYear();
+  cleaned.status_month   = sdt.getMonth() + 1;
+  cleaned.status_quarter = Math.floor(sdt.getMonth() / 3) + 1;
+} else {
+  cleaned.status_ts = null;
+  cleaned.status_year = null;
+  cleaned.status_month = null;
+  cleaned.status_quarter = null;
+}
+
 
       caseRows.push(cleaned);
     });
@@ -195,11 +279,7 @@ function initDimension() {
 
 
 /***** HELPERS *****/
-const keyOf = (y,m,mode) =>
-  mode === 'monthly'   ? `${y}-${m}`       :
-  mode === 'quarterly' ? `${y}-Q${Math.ceil(m/3)}` :
-  mode === 'annual'    ? String(y)          :
-                         `${y}-${m}`;
+
 function fmt(v, isCount){
   if (v==null || Number.isNaN(v)) return 'N/A';
   if (!isCount) return v + '%';
@@ -246,128 +326,99 @@ document.getElementById('metric').parentElement.style.display = isCaseMode ? '' 
   const metricEl = document.getElementById('metric');
   const metric   = isCaseMode ? metricEl.value : 'all_cases';
 
+ const timeMode = (isCaseMode && COMPLETED_METRICS.has(metric)) ? 'status' : 'received';
+
+
   // Pie mode: allow in both datasets, but for cases we only enable pie
   // when the metric is all_cases or a status metric
   const pieMode  = document.getElementById('pieToggle').checked &&
                    (isCaseMode ? (metric === 'all_cases' || STATUS_TYPES.includes(metric)) : true);
 
   /* buckets */
-  const buckets = [];
-if (range === 'last12') {
-  const maxTs = Math.max(...rows.map(r => r.ts));
-  const maxD = new Date(maxTs);
-  const startYear = maxD.getFullYear();
-  const startMonth = maxD.getMonth(); // 0-based
-
-  for (let i = 11; i >= 0; i--) {
-    const offset = startMonth - i;
-    const y = startYear + Math.floor(offset / 12);
-    const m = (offset % 12 + 12) % 12; // handle negatives
-
-    const label = `${MONTH_NAMES[m]} '${String(y).slice(-2)}`;
-    const key = `${y}-${m + 1}`; // m is 0-based
-
-    buckets.push({ y, m: m + 1, label, key });
-  }
-}
-
- else if (range === 'monthly') {
-  const years = [...new Set(rows.map(r => r.year))].sort((a, b) => a - b);
-  years.forEach(year =>
-    MONTH_NAMES.forEach((_, i) =>
-      buckets.push({
-        y: year,
-        m: i + 1,
-        label: `${MONTH_NAMES[i]} '${String(year).slice(-2)}`,
-        key: `${year}-${i + 1}`
-      })
-    )
-  );
-
-} else if (range === 'quarterly') {
-  const years = [...new Set(rows.map(r => r.year))].sort((a, b) => a - b);
-  years.forEach(year =>
-    [1, 2, 3, 4].forEach(q =>
-      buckets.push({
-        y: year,
-        q,
-        label: `Q${q} '${String(year).slice(-2)}`,
-        key: `${year}-Q${q}`
-      })
-    )
-  );
-
-} else { /* annual */
-  const years = [...new Set(rows.map(r => r.year))].sort((a, b) => a - b);
-  years.forEach(year =>
-    buckets.push({
-      y: year,
-      label: String(year),
-      key: String(year)
-    })
-  );
+  const buckets = buildBuckets(rows, range, timeMode, metric);
+if (!buckets.length) {
+  const grid = document.getElementById('chartGrid');
+  grid.innerHTML = `
+    <div class="chart-box">
+      <div class="chart-head">
+        <div class="chart-title">${prettyName(metric)}</div>
+      </div>
+      <div class="chart-number">No data</div>
+      <div style="font-size:.9rem;color:#666">Try a different time range or metric.</div>
+    </div>`;
+  const loading = document.getElementById('pieLoading');
+  if (loading) loading.remove();
+  document.getElementById('compareSection').style.display = 'none';
+  return;
 }
 
 
-  /* aggregates */
 
-  const allCounts = {}, statusCounts = {}, groupAll = {}, groupStatus = {};
+ /* aggregates */
+const allRecv = {}, statusRecv = {}, groupAllRecv = {}, groupStatusRecv = {};
+const statusDone = {}, groupStatusDone = {};
 
-  rows.forEach(r => {
-    const key = keyOf(r.year, r.month, range);
-    let g = r[dim];
-    if (g === undefined || g === null || g === '') g = 'Unknown';
+rows.forEach(r => {
+  let g = r[dim];
+  if (g === undefined || g === null || g === '') g = 'Unknown';
 
-    // always build the "all" counts
-    allCounts[key] = (allCounts[key] || 0) + 1;
-    (groupAll[g] ??= {})[key] = (groupAll[g][key] || 0) + 1;
+  const kR = keyFromRecord(r, range, 'received');
+  if (kR){
+    allRecv[kR] = (allRecv[kR] || 0) + 1;
+    (groupAllRecv[g] ??= {})[kR] = (groupAllRecv[g][kR] || 0) + 1;
 
-    // ONLY do status buckets in case mode (defendants don’t have r.status)
-    if (isCaseMode && r.status) {
-      const s = r.status;
-      (statusCounts[s] ??= {})[key] = (statusCounts[s][key] || 0) + 1;
-      (groupStatus[s] ??= {});
-      (groupStatus[s][g] ??= {});
-      groupStatus[s][g][key] = (groupStatus[s][g][key] || 0) + 1;
+    if (isCaseMode && r.status){
+      (statusRecv[r.status] ??= {})[kR] = (statusRecv[r.status][kR] || 0) + 1;
+      (groupStatusRecv[r.status] ??= {});
+      (groupStatusRecv[r.status][g] ??= {});
+      groupStatusRecv[r.status][g][kR] = (groupStatusRecv[r.status][g][kR] || 0) + 1;
     }
-  });
+  }
+
+  const kS = keyFromRecord(r, range, 'status');
+  if (kS && isCaseMode && r.status){
+    (statusDone[r.status] ??= {})[kS] = (statusDone[r.status][kS] || 0) + 1;
+    (groupStatusDone[r.status] ??= {});
+    (groupStatusDone[r.status][g] ??= {});
+    groupStatusDone[r.status][g][kS] = (groupStatusDone[r.status][g][kS] || 0) + 1;
+  }
+});
+
+
 
 
   /* ---------- map every metric to the counts it needs ---------- */
-  function metricBuckets(metric){
-    // Defendants: always "all"
-    if (!isCaseMode) return { bucket: allCounts, group: groupAll };
+function metricBuckets(metric){
+  if (!isCaseMode) return { bucket: allRecv, group: groupAllRecv };
 
-    switch (metric){
-      case 'all_cases':
-        return { bucket: allCounts, group: groupAll };
+  if (metric === 'all_cases') return { bucket: allRecv, group: groupAllRecv };
 
-      case 'rejected':
-        return { bucket: statusCounts.Rejected || {}, group: groupStatus.Rejected || {} };
-
-      case 'accepted': {
-        const bucket = {}, group = {};
-        for (const k in allCounts){
-          bucket[k] = (allCounts[k] || 0) - (statusCounts.Rejected?.[k] || 0);
-        }
-        for (const g in groupAll){
-          group[g] = {};
-          for (const k in groupAll[g]){
-            const rej = groupStatus.Rejected?.[g]?.[k] || 0;
-            group[g][k] = (groupAll[g][k] || 0) - rej;
-          }
-        }
-        return { bucket, group };
-      }
-
-      case 'Sentenced':
-      case 'Dismissed':
-        return { bucket: statusCounts[metric] || {}, group: groupStatus[metric] || {} };
-
-      default:
-        return { bucket:{}, group:{} };
-    }
+  if (metric === 'rejected') {
+    return { bucket: statusRecv.Rejected || {}, group: groupStatusRecv.Rejected || {} };
   }
+
+  if (metric === 'accepted') {
+    const bucket = {}, group = {};
+    for (const k in allRecv){
+      bucket[k] = (allRecv[k] || 0) - (statusRecv.Rejected?.[k] || 0);
+    }
+    for (const g in groupAllRecv){
+      group[g] = {};
+      for (const k in groupAllRecv[g]){
+        const rej = groupStatusRecv.Rejected?.[g]?.[k] || 0;
+        group[g][k] = (groupAllRecv[g][k] || 0) - rej;
+      }
+    }
+    return { bucket, group };
+  }
+
+  if (metric === 'Sentenced' || metric === 'Dismissed') {
+    return { bucket: statusDone[metric] || {}, group: groupStatusDone[metric] || {} };
+  }
+
+  return { bucket:{}, group:{} };
+}
+
 
 
 
@@ -387,7 +438,8 @@ if (loading) loading.remove();
 
   }
 
-const allLabel = isCaseMode ? 'All Cases' : 'All Defendants';
+const allLabel = isCaseMode ? prettyName(metric) : 'All Defendants';
+
 
 const datasets = [
   {
@@ -653,6 +705,7 @@ document.getElementById('toStats').onclick = () => activatePanel(1);
 document.getElementById('toMonthly').onclick = () => activatePanel(2);
 
 window.build = build;
+
 
 
 
