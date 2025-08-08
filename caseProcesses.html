@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imperial County DA • Case Dashboard</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <!-- fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- styles -->
+  <link rel="stylesheet" href="caseProcesses.css" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="branding">
+      <span class="brand-main">Imperial County District Attorney’s Office</span>
+      <span class="brand-sub">George Marquez, District Attorney</span>
+    </div>
+      <a href="https://da.imperialcounty.org/" >
+        <img src="logo.png" alt="DA Logo" class="logo" />
+    </a>
+  </header>
+
+  <section class="hero">
+    <h1>Data Dashboard</h1>
+    <p>Data transparency & data-driven decision-making</p>
+  </section>
+
+  <nav class="main-nav">
+    <a href="home.html">Home</a>
+    <a href="goals.html">Goals</a>
+    <a href="defendants.html">Defendants</a>
+    <a href="victims.html">Victims</a>
+    <a href="caseProcesses.html" class="active">Case Processes</a>
+    <a href="customAnalysis.html">Custom Analysis</a>
+  </nav>
+
+  <section id="panelMain">
+    <div class="dashboard-header">
+      <h2>Case Processes</h2>
+      <p id="caseProcessDescription">
+  Average days to file and sentence cases <strong id="caseProcessYear"></strong>
+</p>
+ 
+    </div>
+
+    <div class="chart-box">
+      <div class="chart-head">
+        <div class="chart-title">Average days from receiving case to filing charges</div>
+        <div class="chart-month" id="fileMonth"></div>
+      </div>
+      <div class="chart-number" id="fileValue"></div>
+      <div class="chart-canvas">
+        <canvas id="fileChart" width="660" height="160"></canvas>
+      </div>
+      <div class="range-labels"><span>Jan</span><span>Dec</span></div>
+    </div>
+
+    <div class="chart-box">
+      <div class="chart-head">
+        <div class="chart-title">Average days from filing charges to sentencing</div>
+        <div class="chart-month" id="sentMonth"></div>
+      </div>
+      <div class="chart-number" id="sentValue"></div>
+      <div class="chart-canvas">
+        <canvas id="sentChart" width="660" height="160"></canvas>
+      </div>
+      <div class="range-labels"><span>Jan</span><span>Dec</span></div>
+    </div>
+
+    <div class="chart-box">
+      <div class="chart-head">
+        <div class="chart-title">Median days from receiving case to filing charges</div>
+        <div class="chart-month" id="fileMedianMonth"></div>
+      </div>
+      <div class="chart-number" id="fileMedianValue"></div>
+      <div class="chart-canvas">
+        <canvas id="fileMedianChart" width="660" height="160"></canvas>
+      </div>
+      <div class="range-labels"><span>Jan</span><span>Dec</span></div>
+    </div>
+
+    <div class="chart-box">
+      <div class="chart-head">
+        <div class="chart-title">Median days from filing charges to sentencing</div>
+        <div class="chart-month" id="sentMedianMonth"></div>
+      </div>
+      <div class="chart-number" id="sentMedianValue"></div>
+      <div class="chart-canvas">
+        <canvas id="sentMedianChart" width="660" height="160"></canvas>
+      </div>
+      <div class="range-labels"><span>Jan</span><span>Dec</span></div>
+    </div>
+  </section>
+
+  <!-- scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="caseProcesses.js"></script>
+
+</body>
+</html>

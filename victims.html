@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imperial County DA • Case Dashboard</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <!-- fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- styles -->
+  <link rel="stylesheet" href="victims.css" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="branding">
+      <span class="brand-main">Imperial County District Attorney’s Office</span>
+      <span class="brand-sub">George Marquez, District Attorney</span>
+    </div>
+     <a href="https://da.imperialcounty.org/" >
+        <img src="logo.png" alt="DA Logo" class="logo" />
+    </a>
+  </header>
+
+  <section class="hero">
+    <h1>Data Dashboard</h1>
+    <p>Data transparency & data-driven decision-making</p>
+  </section>
+
+  <nav class="main-nav">
+    <a href="home.html">Home</a>
+    <a href="goals.html">Goals</a>
+    <a href="defendants.html">Defendants</a>
+    <a href="victims.html" class="active">Victims</a>
+    <a href="caseProcesses.html">Case Processes</a>
+    <a href="customAnalysis.html">Custom Analysis</a>
+  </nav>
+
+
+
+  <section id="panelVictims" class="victim-panel">
+  <div class="victim-wrapper">
+  <div id="victimHeader" class="victim-header">
+    <h2>Victim Services</h2>
+    <p id="victimSub" class="victim-sub">Fetching the data</p>
+  </div>
+
+  <div class="victim-flex">
+    <div class="victim-left" id="victimStatsWrap"></div>
+
+    <div class="victim-right">
+  <div id="victimDescBox" class="victim-desc-dynamic">
+    <h3>Hover a service type to see description</h3>
+  </div>
+  <canvas id="victimPieChart" ></canvas>
+  </div>
+  </div>
+  </div>
+</section>
+  <!-- <section id="panelMain">
+    <div class="dashboard-header">
+      <h2>Victims</h2>
+      <p> </p>
+    </div>
+  </section> -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="victims.js"></script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+/* RESET + BASE */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f8f9fa;
+  color: #222;
+  line-height: 1.6;
+}
+
+/* NAVBAR */
+.nav {
+  background: linear-gradient(90deg, #1a1c3a, #0d0e22);
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.branding {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand-main {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.brand-sub {
+  font-size: 1.05rem;
+  color: #a9b0d4;
+  font-weight: 400;
+}
+
+.logo {
+  height: 100px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+/* HERO */
+.hero {
+  background: linear-gradient(270deg, #242673 30%, #15163d 100%);
+  color: #dfe3f7;
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.hero h1 {
+  font-size: 2.2rem;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.hero p {
+  font-size: 1rem;
+  color: #a9b0d4;
+}
+
+/* NAVIGATION LINKS */
+.main-nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 25px;
+  background: #ffffff;
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+  font-weight: 600;
+}
+
+.main-nav a {
+  text-decoration: none;
+  color: #333;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.main-nav a:hover {
+  background: #e0e0e0;
+  color: #000;
+}
+
+.main-nav a.active {
+  color: #007acc;
+  border-bottom: 2px solid #007acc;
+  cursor: default;
+}
+
+/* MAIN SECTION */
+#panelMain {
+  padding: 30px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.victim-panel {
+  padding: 30px 20px;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.dashboard-header h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.dashboard-header p {
+  font-size: 1.2rem;
+  color: #444;
+}
+
+.victim-flex {
+  display: flex;
+  justify-content: center;      /* Center the flex items horizontally */
+  align-items: flex-start;
+  gap: 40px;
+  padding-left: 0;              /* Remove or reduce left padding */
+}
+
+.victim-left {
+  display: block; /* <-- Change from flex to block */
+  width: auto;
+}
+
+.victimStatsWrap {
+  display: grid;
+  grid-template-columns: 1fr;
+  max-width: 400px;
+  padding: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Card style */
+.victim-card {
+  background: #fff;
+  border-left: 8px solid #2196f3; /* color can be dynamic */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 10px;
+  transition: all 0.3s ease;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 20px; /*controls the gap between the cards*/
+}
+
+.victim-card:hover {
+  transform: translateY(-2px);
+  background: #f0f8ff;
+}
+
+.victim-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.victim-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+/* .victim-card .percent {
+  font-size: 0.9rem;
+  color: #666;
+} */
+
+.victim-panel {
+  padding-bottom: 25px; /* Add space below the cards for scrolling */
+}
+
+.victim-right {
+  position: relative;
+  min-height: 500px; /* increase height to allow space below card */
+}
+
+.victim-desc-dynamic {
+  max-width: 380px;  /* or fixed width */
+  width: 100%;       /* fill container width up to max-width */
+  /* keep vertical growth allowed */
+  min-height: 120px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 20px;  /* small margin before pie chart */
+  transition: opacity 0.3s ease;
+}
+
+
+.victim-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.victim-header h2 {
+  font-size: 2.2rem;  /* Make it large */
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.victim-sub {
+  font-size: 1.2rem; 
+  color: #444;
+}
+
+#victimPieChart {
+  position: absolute;
+  top: 220px;
+  left: 0;
+  width: 400px;    /* fixed */
+  height: 250px;   /* fixed */
+  z-index: 1;
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imperial County DA • Case Dashboard</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <!-- fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- styles -->
+  <link rel="stylesheet" href="goals.css" />
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="goals.js" defer></script>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="branding">
+      <span class="brand-main">Imperial County District Attorney’s Office</span>
+      <span class="brand-sub">George Marquez, District Attorney</span>
+    </div>
+      <a href="https://da.imperialcounty.org/" >
+        <img src="logo.png" alt="DA Logo" class="logo" />
+    </a>
+  </header>
+
+  <section class="hero">
+    <h1>Data Dashboard</h1>
+    <p>Data transparency & data-driven decision-making</p>
+  </section>
+
+  <nav class="main-nav">
+    <a href="home.html">Home</a>
+    <a href="goals.html" class="active">Goals</a>
+    <a href="defendants.html">Defendants</a>
+    <a href="victims.html">Victims</a>
+    <a href="caseProcesses.html">Case Processes</a>
+    <a href="customAnalysis.html">Custom Analysis</a>
+  </nav>
+
+  <section id="panelMain">
+    <div class="dashboard-header">
+      <h2>Goals</h2>
+      <p>Reach target processing volume by 2024.</p>
+    </div>
+
+    <div class="chart-section">
+      <h3>Goal 1: Total Cases Filed Per Year</h3>
+      <p class="chart-desc">We're aiming to steadily increase case filing efficiency across the county.</p>
+      <div class="hoverDisplay">
+        <div><strong id="monthLabel1">Month</strong></div>
+        <div><span class="label2023">2023:</span> <strong id="val2023">—</strong></div>
+        <div><span class="label2024">2024:</span> <strong id="val2024">—</strong></div>
+        <div><span class="labelDiff">Δ:</span> <strong id="valDiff">—</strong></div>
+      </div>
+      <div class="goalChart">
+        <canvas id="casesFiledChart"></canvas>
+      </div>
+
+      <h3>Goal 2: Outer County Prosecution Activity</h3>
+      <p class="chart-desc">Tracking case filings from regions outside core cities like El Centro, Calexico, Imperial, and Brawley.</p>
+      <div class="hoverDisplay">
+        <div><strong id="monthLabel2">Month</strong></div>
+        <div><span class="label2023">2023:</span> <strong id="val2023Outer">—</strong></div>
+        <div><span class="label2024">2024:</span> <strong id="val2024Outer">—</strong></div>
+        <div><span class="labelDiff">Δ:</span> <strong id="valDiffOuter">—</strong></div>
+      </div>
+      <div class="goalChart">
+        <canvas id="outerRegionChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

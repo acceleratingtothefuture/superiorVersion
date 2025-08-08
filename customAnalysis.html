@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imperial County DA • Case Dashboard</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <!-- fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- styles -->
+  <link rel="stylesheet" href="customAnalysis.css" />
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alasql/dist/alasql.min.js"></script>
+
+  <!-- dashboard logic -->
+  <script type="module" defer src="customAnalysis.js"></script>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="branding">
+      <span class="brand-main">Imperial County District Attorney’s Office</span>
+      <span class="brand-sub">George Marquez, District Attorney</span>
+    </div>
+      <a href="https://da.imperialcounty.org/" >
+        <img src="logo.png" alt="DA Logo" class="logo" />
+    </a>
+  </header>
+
+  <section class="hero">
+    <h1>Data Dashboard</h1>
+    <p>Data transparency & data-driven decision-making</p>
+  </section>
+
+  <nav class="main-nav">
+    <a href="home.html">Home</a>
+    <a href="goals.html">Goals</a>
+    <a href="defendants.html">Defendants</a>
+    <a href="victims.html">Victims</a>
+    <a href="caseProcesses.html">Case Processes</a>
+    <a href="customAnalysis.html" class="active">Custom Analysis</a>
+  </nav>
+
+  <section id="panelMain">
+    <div class="dashboard-header">
+      <h2>Custom Analysis</h2>
+      <p>View case outcomes and demographics over time</p>
+    </div>
+
+    <div class="layout">
+      <!-- sidebar -->
+      <aside class="sidebar">
+        <h2>Filters</h2>
+<label>Dataset
+  <select id="dataset">
+    <option value="cases" selected>Cases</option>
+    <option value="defendants">Defendants</option>
+  </select>
+</label>
+
+        <label>Measure
+          <select id="metric">
+            <option value="all_cases">All cases received</option>
+            <option value="accepted">Accepted cases</option>
+            <option value="rejected">Rejected cases</option>
+            <optgroup label="Completed cases">
+              <option value="Sentenced">Sentenced</option>
+              <option value="Dismissed">Dismissed</option>
+            </optgroup>
+          </select>
+        </label>
+
+        <label>Time range
+          <select id="range">
+            <option value="last12">Last 12 months</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="annual">Annual</option>
+          </select>
+        </label>
+
+        <label>Group by
+          <select id="dimension"></select>
+        </label>
+
+        <label class="checkbox">
+          <input type="checkbox" id="pieToggle" checked />
+          Use pie-chart mode
+        </label>
+      </aside>
+
+      <!-- charts -->
+      <main class="dashboard">
+        <div id="compareSection" style="display:none;margin-top:40px;">
+          <h2 style="text-align:center;">Comparison chart</h2>
+          <div class="large-chart-container">
+            <canvas id="largeChart" height="150"></canvas>
+          </div>
+        </div>
+        <div id="pieLoading" class="loading-message">Currently loading your data…</div>
+
+        <section id="chartGrid" class="chart-grid"></section>
+      </main>
+    </div>
+  </section>
+
+</body>
+</html>
