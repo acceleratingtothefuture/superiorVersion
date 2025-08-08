@@ -280,7 +280,7 @@ function initDimension() {
   const mode   = document.getElementById('dataset').value;      // cases | defendants
   const sel    = document.getElementById('dimension');
   const ignore = ['case_id','date_da','year','month','quarter','ts',
-                  'days_to_file','days_file_to_sent','age'];
+                  'days_to_file','days_file_to_sent','age', 'status_date', 'status_year', 'status_month', 'status_quarter'];
 
   const source = mode === 'cases' ? caseRows[0] : defRows[0];
   let keys     = Object.keys(source).filter(k => !ignore.includes(k));
@@ -725,7 +725,6 @@ document.getElementById('toStats').onclick = () => activatePanel(1);
 document.getElementById('toMonthly').onclick = () => activatePanel(2);
 
 window.build = build;
-
 
 
 
